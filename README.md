@@ -1,4 +1,4 @@
-# Reverse Engineering a Sonic J2ME Game: Building a Full Map & Object Editor
+# Reverse Engineering Sonic J2ME Game: Building a Full Map & Object Editor
 
 > A deep-dive into binary format analysis, Java bytecode reverse engineering, and building a functional level editor for a classic mobile Sonic game using Python and PIL.
 
