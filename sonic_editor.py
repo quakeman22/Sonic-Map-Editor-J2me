@@ -200,7 +200,12 @@ def read_tile_info(bmd: bytearray, block_idx: int, tx: int, ty: int):
     ctrl        = bmd[offset]
     tile_id     = bmd[offset + 1]
     raw_offset  = ctrl & 3          # bits 1-0
-    image_off   = 1 if (ctrl & 1) else (2 if raw_offset == 2 else 0)
+    if raw_offset == 1:
+        image_off = 1
+    elif raw_offset == 2:
+        image_off = 2
+    else:
+        image_off = 0
     rotation    = (ctrl >> 3) & 3
     effective   = tile_id + image_off * 256
     src_x       = (effective % TILES_PER_ROW_TS) * TILE_PX
@@ -239,7 +244,7 @@ def is_solid(col_data: bytearray, block_idx: int, tx: int, ty: int,
     return bool(bit)
 
 
-def parse_act_buf(buf: (bytes, bytearray)) -> list:
+def parse_act_buf(buf) -> list:
     """Parse a raw act buffer into a list of object dicts (7 bytes each)."""
     n = len(buf) // 7
     objects = []
@@ -272,7 +277,7 @@ def serialize_act_buf(objects: list) -> bytearray:
     return buf
 
 
-def parse_act_file(data: (bytes, bytearray)):
+def parse_act_file(data):
     """Parse a full .act file.
 
     Returns (raw_act_bufs, parsed_acts) where raw_act_bufs is a list of
@@ -1114,8 +1119,10 @@ class SonicEditor:
         z   = self.zone
         bmd = self.bmd_data.get(z, bytearray(84 * BYTES_PER_BLOCK_BMD))
         ts  = self.tilesets.get(z)
-        blk_img = render_block(bmd, block_idx, ts) if block_idx > 0 else \
-            Image.new("RGBA", (BLOCK_PX, BLOCK_PX), (30, 30, 30, 255))
+        if block_idx > 0:
+            blk_img = render_block(bmd, block_idx, ts)
+        else:
+            blk_img = Image.new("RGBA", (BLOCK_PX, BLOCK_PX), (30, 30, 30, 255))
         # Tile grid overlay
         draw = ImageDraw.Draw(blk_img)
         for t in range(0, BLOCK_PX, TILE_PX):
